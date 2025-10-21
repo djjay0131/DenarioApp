@@ -91,13 +91,8 @@ def description_comp(den: Denario) -> None:
                         summarizer_model=summarizer_model,
                         summarizer_response_formatter_model=formatter_model
                     )
-                except TypeError as e:
-                    if "unexpected keyword argument" in str(e):
-                        # Fallback to method without model parameters (older version)
-                        st.warning("Using enhanced data description without model selection (please restart the app to enable model selection)")
-                        den.enhance_data_description()
-                    else:
-                        raise e
+                except Exception as e:
+                    raise e
                 
                 st.success("Data description enhanced successfully!")
                 # Clear the text area by updating session state
@@ -187,7 +182,7 @@ def idea_comp(den: Denario) -> None:
         col5, col6 = st.columns(2)
         with col5:
             st.caption("Default Orchestration Model")
-            default_orchestration_model = st.selectbox(
+            orchestration_model = st.selectbox(
                 "Default Orchestration Model",
                 model_keys,
                 index=model_keys.index("gpt-4.1"),
@@ -195,7 +190,7 @@ def idea_comp(den: Denario) -> None:
             )
         with col6:
             st.caption("Default Formatter Model")
-            default_formatter_model = st.selectbox(
+            formatter_model = st.selectbox(
                 "Default Formatter Model",
                 model_keys,
                 index=model_keys.index("o3-mini"),
@@ -249,8 +244,8 @@ def idea_comp(den: Denario) -> None:
                                      idea_hater_model=models[idea_hater_model], 
                                      planner_model=models[planner_model],
                                      plan_reviewer_model=models[plan_reviewer_model],
-                                     default_orchestration_model=models[default_orchestration_model],
-                                     default_formatter_model=models[default_formatter_model],
+                                     orchestration_model=models[orchestration_model],
+                                     formatter_model=models[formatter_model],
                                      mode="cmbagent")
                     
                     if st.session_state.idea_running:  # Only show success if not stopped
@@ -330,7 +325,7 @@ def method_comp(den: Denario) -> None:
         col5, col6 = st.columns(2)
         with col5:
             st.caption("Default Orchestration Model")
-            default_orchestration_model = st.selectbox(
+            orchestration_model = st.selectbox(
                 "Default Orchestration Model",
                 model_keys,
                 index=model_keys.index("gpt-4.1"),
@@ -338,7 +333,7 @@ def method_comp(den: Denario) -> None:
             )
         with col6:
             st.caption("Default Formatter Model")
-            default_formatter_model = st.selectbox(
+            formatter_model = st.selectbox(
                 "Default Formatter Model",
                 model_keys,
                 index=model_keys.index("o3-mini"),
@@ -390,8 +385,8 @@ def method_comp(den: Denario) -> None:
                         den.get_method(planner_model=planner_model, 
                                        plan_reviewer_model=plan_reviewer_model, 
                                        method_generator_model=method_generator_model,
-                                       default_orchestration_model=models[default_orchestration_model], 
-                                       default_formatter_model=models[default_formatter_model],
+                                       orchestration_model=models[orchestration_model], 
+                                       formatter_model=models[formatter_model],
                                        mode="cmbagent")
                     
                     if st.session_state.method_running:  # Only show success if not stopped
@@ -473,7 +468,7 @@ def results_comp(den: Denario) -> None:
         col3, col4 = st.columns(2)
         with col3:
             st.caption("Default Orchestration Model")
-            default_orchestration_model = st.selectbox(
+            orchestration_model = st.selectbox(
                 "Default Orchestration Model",
                 model_keys,
                 index=model_keys.index("gpt-4.1"),
@@ -481,7 +476,7 @@ def results_comp(den: Denario) -> None:
             )
         with col4:
             st.caption("Default Formatter Model")
-            default_formatter_model = st.selectbox(
+            formatter_model = st.selectbox(
                 "Default Formatter Model",
                 model_keys,
                 index=model_keys.index("o3-mini"),
@@ -542,8 +537,8 @@ def results_comp(den: Denario) -> None:
                                     plan_reviewer_model=models[plan_reviewer_model],
                                     max_n_attempts=max_n_attempts,
                                     max_n_steps=max_n_steps,
-                                    default_orchestration_model=models[default_orchestration_model],
-                                    default_formatter_model=models[default_formatter_model])
+                                    orchestration_model=models[orchestration_model],
+                                    formatter_model=models[formatter_model])
                     
                     if st.session_state.results_running:  # Only show success if not stopped
                         st.success("Done!")
