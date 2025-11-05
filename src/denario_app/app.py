@@ -144,6 +144,9 @@ st.write("""
         From developing research ideas, developing methods, computing results and writing or reviewing papers.
          """)
 
+if deploy:
+    st.warning("⚠️ This is a demo deployment of Denario on Hugging Face Spaces. Your session will expire if you close the tab or refresh the page. Recall to download your project files from the sidebar before leaving! ⚠️")
+
 # Load Font Awesome CSS
 st.markdown(
     """

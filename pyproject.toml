@@ -1,6 +1,6 @@
 [project]
 name = "denario_app"
-version = "1.0.0"
+version = "1.0.1"
 description = "GUI for the multiagent research assistant Denario"
 maintainers = [
   { name = "Denario", email = "denario.astropilot.ai@gmail.com" },
