@@ -29,26 +29,27 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install the project into `/app`
+WORKDIR /app
+
+# Copy all the app code to the docker and install as root
+COPY . /app
+
+# Install the package
+RUN pip install .
+
 # Set up a new user named "user" with user ID 1000
 RUN useradd -m -u 1000 user
 
-# Switch to the "user" user
+# Change ownership of app directory to user
+RUN chown -R user:user /app
+
+# Switch to the "user" user for runtime
 USER user
 
 # Set home to the user's home directory
 ENV HOME=/home/user \
 	PATH=/home/user/.local/bin:$PATH
-
-# Install the project into `/app`
-WORKDIR $HOME/app
-
-# Then, add the rest of the project source code and install it
-# Installing separately from its dependencies allows optimal layer caching
-# Copy all the app code to the docker
-COPY --chown=user . $HOME/app
-
-# Install
-RUN pip install .
 
 # This informs Docker that the container will listen on port 5000 at runtime.
 EXPOSE 8501
