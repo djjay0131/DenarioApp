@@ -31,11 +31,14 @@ def description_comp(den: Denario) -> None:
         height=100
     )
 
-    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False, type=["md", "txt"])
 
     if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        den.set_data_description(content)   
+        try:
+            content = uploaded_file.read().decode("utf-8")
+            den.set_data_description(content)
+        except UnicodeDecodeError:
+            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")   
 
     if data_descr:
 
@@ -255,11 +258,14 @@ def idea_comp(den: Denario) -> None:
                 finally:
                     st.session_state.idea_running = False
 
-    uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False, type=["md", "txt"])
 
     if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        den.set_idea(content)
+        try:
+            content = uploaded_file.read().decode("utf-8")
+            den.set_idea(content)
+        except UnicodeDecodeError:
+            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")
 
     try:
         show_markdown_file(den.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
@@ -396,11 +402,14 @@ def method_comp(den: Denario) -> None:
                 finally:
                     st.session_state.method_running = False
 
-    uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False, type=["md", "txt"])
 
     if uploaded_file:
-        content = uploaded_file.read().decode("utf-8")
-        den.set_method(content)
+        try:
+            content = uploaded_file.read().decode("utf-8")
+            den.set_method(content)
+        except UnicodeDecodeError:
+            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")
 
     try:
         show_markdown_file(den.project_dir+"/input_files/methods.md",label="methods")
@@ -553,8 +562,11 @@ def results_comp(den: Denario) -> None:
         plots = []
         for file in uploaded_files:
             if file.name.endswith(".md"):
-                content = file.read().decode("utf-8")
-                den.set_results(content)
+                try:
+                    content = file.read().decode("utf-8")
+                    den.set_results(content)
+                except UnicodeDecodeError:
+                    st.error(f"Unable to read {file.name}. Please ensure it's a valid UTF-8 encoded markdown file.")
             else:
                 plots.append(Image.open(file))
         den.set_plots(plots)
