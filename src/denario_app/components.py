@@ -4,10 +4,51 @@ import streamlit as st
 from streamlit_pdf_viewer import pdf_viewer
 from denario import Denario, Journal
 from denario import models
+import fitz  # PyMuPDF
 
 from utils import show_markdown_file, create_zip_in_memory, stream_to_streamlit
 
-#--- 
+#---
+# Helper functions
+#---
+
+def extract_text_from_file(uploaded_file) -> str:
+    """
+    Extract text from an uploaded file. Supports PDF, markdown, and text files.
+
+    Args:
+        uploaded_file: Streamlit UploadedFile object
+
+    Returns:
+        str: Extracted text content
+
+    Raises:
+        ValueError: If file type is not supported or text extraction fails
+    """
+    filename = uploaded_file.name.lower()
+    file_bytes = uploaded_file.read()
+
+    if filename.endswith('.pdf'):
+        try:
+            # Use PyMuPDF to extract text from PDF
+            doc = fitz.open(stream=file_bytes, filetype="pdf")
+            text = ""
+            for page in doc:
+                text += page.get_text()
+            doc.close()
+            if not text.strip():
+                raise ValueError("PDF appears to be empty or contains only images (no extractable text).")
+            return text
+        except Exception as e:
+            raise ValueError(f"Failed to extract text from PDF: {str(e)}")
+    else:
+        # Assume text file (md, txt, etc.)
+        try:
+            return file_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            raise ValueError("Unable to read file. Please upload a valid text file (UTF-8 encoded).")
+
+#---
 # Components
 #---
 
@@ -31,14 +72,14 @@ def description_comp(den: Denario) -> None:
         height=100
     )
 
-    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description in markdown format.", accept_multiple_files=False, type=["md", "txt"])
+    uploaded_file = st.file_uploader("Alternatively, upload a file with the data description (supports .md, .txt, or .pdf).", accept_multiple_files=False, type=["md", "txt", "pdf"])
 
     if uploaded_file:
         try:
-            content = uploaded_file.read().decode("utf-8")
+            content = extract_text_from_file(uploaded_file)
             den.set_data_description(content)
-        except UnicodeDecodeError:
-            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")   
+        except ValueError as e:
+            st.error(str(e))   
 
     if data_descr:
 
@@ -258,14 +299,14 @@ def idea_comp(den: Denario) -> None:
                 finally:
                     st.session_state.idea_running = False
 
-    uploaded_file = st.file_uploader("Choose a file with the research idea", accept_multiple_files=False, type=["md", "txt"])
+    uploaded_file = st.file_uploader("Choose a file with the research idea (supports .md, .txt, or .pdf)", accept_multiple_files=False, type=["md", "txt", "pdf"])
 
     if uploaded_file:
         try:
-            content = uploaded_file.read().decode("utf-8")
+            content = extract_text_from_file(uploaded_file)
             den.set_idea(content)
-        except UnicodeDecodeError:
-            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")
+        except ValueError as e:
+            st.error(str(e))
 
     try:
         show_markdown_file(den.project_dir+"/input_files/idea.md", extra_format=True, label="idea")
@@ -402,14 +443,14 @@ def method_comp(den: Denario) -> None:
                 finally:
                     st.session_state.method_running = False
 
-    uploaded_file = st.file_uploader("Choose a file with the research methods", accept_multiple_files=False, type=["md", "txt"])
+    uploaded_file = st.file_uploader("Choose a file with the research methods (supports .md, .txt, or .pdf)", accept_multiple_files=False, type=["md", "txt", "pdf"])
 
     if uploaded_file:
         try:
-            content = uploaded_file.read().decode("utf-8")
+            content = extract_text_from_file(uploaded_file)
             den.set_method(content)
-        except UnicodeDecodeError:
-            st.error("Unable to read file. Please upload a valid markdown (.md) or text (.txt) file.")
+        except ValueError as e:
+            st.error(str(e))
 
     try:
         show_markdown_file(den.project_dir+"/input_files/methods.md",label="methods")
@@ -561,13 +602,15 @@ def results_comp(den: Denario) -> None:
     if uploaded_files:
         plots = []
         for file in uploaded_files:
-            if file.name.endswith(".md"):
+            filename = file.name.lower()
+            if filename.endswith(".md") or filename.endswith(".txt") or filename.endswith(".pdf"):
                 try:
-                    content = file.read().decode("utf-8")
+                    content = extract_text_from_file(file)
                     den.set_results(content)
-                except UnicodeDecodeError:
-                    st.error(f"Unable to read {file.name}. Please ensure it's a valid UTF-8 encoded markdown file.")
+                except ValueError as e:
+                    st.error(f"Error reading {file.name}: {str(e)}")
             else:
+                # Assume it's an image for plots
                 plots.append(Image.open(file))
         den.set_plots(plots)
 
