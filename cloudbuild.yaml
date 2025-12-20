@@ -45,6 +45,8 @@ steps:
       - '2'
       - '--set-secrets'
       - 'OPENAI_API_KEY=OPENAI_API_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,GOOGLE_API_KEY=GOOGLE_API_KEY:latest,PERPLEXITY_API_KEY=PERPLEXITY_API_KEY:latest'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/denario/denario-app:$COMMIT_SHA'
